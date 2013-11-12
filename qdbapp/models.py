@@ -7,6 +7,6 @@ class Quote(models.Model):
     channel = models.CharField(max_length=32)
     username = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(editable=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, editable=False)
 
 secretballot.enable_voting_on(Quote)
