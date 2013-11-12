@@ -5,16 +5,41 @@
 <ul class="list-unstyled">
     {% for quote in quotes %}
     <li class="row">
-        <h4 class="text-muted">
+        <h5 class="text-muted">
+            <div class="badge" title="+{{ quote.total_upvotes }} &minus;{{ quote.total_downvotes }}">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+                {{ quote.vote_total }}
+                <span class="glyphicon glyphicon-chevron-up"></span>
+            </div>
             <a class="username" href="/u/{{ quote.username|urlencode }}">{{ quote.username }}</a>
             submitted to
             <a class="channel" href="/c/{{ quote.channel|urlencode }}">#{{ quote.channel }}</a>
             <time datetime="{{ quote.timestamp|time:"c" }}">{{ quote.timestamp|timesince }}</time>
             ago
-        </h4>
+        </h5>
         <pre>{{ quote.body }}</pre>
     </article>
     {% endfor %}
+</ul>
+
+<ul class="pagination">
+    {% if quotes.has_previous %}
+    <li><a href="?{{ paginate_query }}page={{ quotes.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+    <li class="disabled"><a>&laquo;</a></li>
+    {% endif %}
+
+    {% for page in quotes.paginator.page_range %}
+    <li{% if quotes.number == page %} class="active"{% endif %}>
+        <a href="?{{ paginate_query }}page={{ page }}">{{ page }}</a>
+    </li>
+    {% endfor %}
+
+    {% if quotes.has_next %}
+    <li><a href="?{{ paginate_query }}page={{ quotes.next_page_number }}">&raquo;</a></li>
+    {% else %}
+    <li class="disabled"><a>&raquo;</a></li>
+    {% endif %}
 </ul>
 
 {% endblock %}
