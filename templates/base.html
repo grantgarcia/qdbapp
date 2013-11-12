@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1" />
+
+<title>{% if title %}{{ title }} &mdash; {% endif %}QDB</title>
+
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.min.css" %}" />
+
+{% block css %}{% endblock %}
+{% block js %}{% endblock %}
+
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+<![endif]-->
+
+<div class="container">
+
+    <header class="header">
+        <ul class="nav nav-pills pull-right">
+            <li data-page-name="add"><a href="/add">Add Quote</a></li>
+            <li data-page-name="newest"><a href="/">Newest</a></li>
+            <li data-page-name="top"><a href="/?sort=top">Top</a></li>
+            <li data-page-name="search"><a href="/search">Search</a></li>
+        </ul>
+        <h1>QDB</h1>
+        {% if title %}<h2>{{ title }}</h2>{% endif %}
+    </header>
+
+    {% block body %}{% endblock %}
+
+</div>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+<script>
+$("li[data-page-name='{{ pagename }}']").addClass('active');
+</script>
+
+{% comment %}
+vim:filetype=htmldjango
+{% endcomment %}
