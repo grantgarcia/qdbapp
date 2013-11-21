@@ -1,7 +1,17 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render
+from django.forms import ModelForm
+from django.shortcuts import render, redirect
 
 from qdbapp.models import Quote
+
+# http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django/5976065#5976065
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 def quotes(request, **kwargs):
     
@@ -57,9 +67,27 @@ def quotes(request, **kwargs):
 
     return render(request, 'quotes.html', data)
 
+class QuoteForm(ModelForm):
+    
+    class Meta:
+        model = Quote
+        fields = ['body', 'channel', 'username']
+
+    def clean_channel(self):
+        self.cleaned_data['channel'] = self.cleaned_data['channel'].lstrip('#')
+        return self.cleaned_data['channel']
 
 def add(request):
 
-    data = {'pagename': 'add'}
-
+    if request.method == 'POST':
+        quote_form = QuoteForm(request.POST)
+        if quote_form.is_valid():
+            quote = quote_form.save(commit=False)
+            quote.ip = get_client_ip(request)
+            quote.save()
+            return redirect('/')
+    else:
+        quote_form = QuoteForm()
+    
+    data = {'pagename': 'add', 'quote_form': quote_form}
     return render(request, 'add.html', data)

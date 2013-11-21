@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style type="text/css">
+
+p label {
+    min-width: 6em;
+}
+
+textarea {
+    width: 50%;
+}
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ quote_form.as_p }}
+    <p>
+        <input type="submit" value="Add Quote" />
+    </p>
+</form>
+
+{% endblock %}

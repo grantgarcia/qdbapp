@@ -4,4 +4,5 @@ urlpatterns = patterns('qdbapp.views',
     url(r'^$', 'quotes'),
     url(r'^c/(?P<channel>([^/]+))/?$', 'quotes'),
     url(r'^u/(?P<username>([^/]+))/?$', 'quotes'),
+    url(r'^add/?$', 'add'),
 )
