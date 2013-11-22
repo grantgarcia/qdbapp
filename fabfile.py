@@ -15,5 +15,5 @@ def deploy_staging():
 def deploy_production():
     with lcd('../production/'):
         local('git pull origin master')
-        local('python manage.py migrate wb')
+        local('python manage.py migrate qdbapp')
         local('sudo supervisorctl restart washboard-production')
