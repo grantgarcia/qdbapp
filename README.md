@@ -6,6 +6,6 @@ A minimal IRC quote database for Django.  Anonymous voting is done via [django-s
 Setup
 -----
 
-qdbapp uses Python 2.7.  [requirements.txt][/requirements.txt] contains the list of dependencies.  virtualenv is recommended.
+qdbapp uses Python 2.7.  [requirements.txt](/requirements.txt) contains the list of dependencies.  virtualenv is recommended.
 
 Copy [local\_settings\_example.py](/qdb/local_settings_example.py) to local\_settings.py and edit the configuration values accordingly.
