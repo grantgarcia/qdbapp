@@ -1,8 +1,15 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms import ModelForm
-from django.shortcuts import render, redirect
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, render, redirect
 
 from qdbapp.models import Quote
+
+def do_or_404(action, catch=BaseException):
+    try:
+        return action()
+    except catch:
+        raise Http404
 
 # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django/5976065#5976065
 def get_client_ip(request):
@@ -13,8 +20,14 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def quotes(request, **kwargs):
+def single_quote(request, quote_id):
+    quote_id = do_or_404(lambda: int(quote_id))
+    data = {'pagename': '', 'title': 'Quote #%d' % quote_id, 'hide_pagination': True}
+    data['quotes'] = [do_or_404(lambda: Quote.objects.get(id__exact=quote_id))]
     
+    return render(request, 'quotes.html', data)
+
+def quotes(request, **kwargs):    
     sort = request.GET.get('sort', 'newest')
     channel = kwargs.get('channel')
     username = kwargs.get('username')
@@ -68,7 +81,6 @@ def quotes(request, **kwargs):
     return render(request, 'quotes.html', data)
 
 class QuoteForm(ModelForm):
-    
     class Meta:
         model = Quote
         fields = ['body', 'channel', 'username']
@@ -78,7 +90,6 @@ class QuoteForm(ModelForm):
         return self.cleaned_data['channel']
 
 def add(request):
-
     if request.method == 'POST':
         quote_form = QuoteForm(request.POST)
         if quote_form.is_valid():
@@ -91,3 +102,15 @@ def add(request):
     
     data = {'pagename': 'add', 'quote_form': quote_form}
     return render(request, 'add.html', data)
+
+def vote(request, quote_id, direction):
+    quote_id = do_or_404(lambda: int(quote_id))
+    direction = do_or_404(lambda: {'up': 1, 'down': -1}[direction])
+    quote = do_or_404(lambda: Quote.objects.get(id__exact=quote_id))
+    
+    # Register the vote
+    quote.add_vote(request.secretballot_token, direction)
+    
+    # Reload the quote to get the new vote count
+    quote = Quote.objects.get(id__exact=quote_id)
+    return HttpResponse(str(quote.vote_total))

@@ -4,12 +4,12 @@
 
 <ul class="list-unstyled">
     {% for quote in quotes %}
-    <li class="row">
+    <li id="quote-{{ quote.id }}" class="row">
         <h5 class="text-muted">
             <div class="badge" title="+{{ quote.total_upvotes }} &minus;{{ quote.total_downvotes }}">
-                <span class="glyphicon glyphicon-chevron-down"></span>
-                {{ quote.vote_total }}
-                <span class="glyphicon glyphicon-chevron-up"></span>
+                <span class="glyphicon glyphicon-chevron-down" onclick="QDB.vote({{ quote.id }}, 'down')"></span>
+                <span class="vote_total">{{ quote.vote_total }}</span>
+                <span class="glyphicon glyphicon-chevron-up" onclick="QDB.vote({{ quote.id }}, 'up')"></span>
             </div>
             <a class="username" href="/u/{{ quote.username|urlencode }}">{{ quote.username }}</a>
             submitted to
@@ -22,6 +22,7 @@
     {% endfor %}
 </ul>
 
+{% if not hide_pagination %}
 <ul class="pagination">
     {% if quotes.has_previous %}
     <li><a href="?{{ paginate_query }}page={{ quotes.previous_page_number }}">&laquo;</a></li>
@@ -41,5 +42,43 @@
     <li class="disabled"><a>&raquo;</a></li>
     {% endif %}
 </ul>
+{% endif %}
 
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+(function(QDB, $, undefined) {
+    'use strict';
+    
+    // https://docs.djangoproject.com/en/dev/ref/contrib/csrf/#ajax
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    QDB.vote = function(quote, direction) {
+        $.ajax({
+            'url': '/vote/' + quote + '/' + direction,
+            'headers': {'X-CSRFToken': getCookie('csrftoken')},
+        }).done(function(result) {
+            $('#quote-' + quote + ' .vote_total').text(result);
+        }).fail(function() {
+            alert('Failed to register vote.');
+        });
+    }
+
+}(window.QDB = window.QDB || {}, jQuery));
+</script>
 {% endblock %}
