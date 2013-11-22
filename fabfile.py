@@ -10,10 +10,10 @@ def deploy_staging():
     with lcd('../staging/'):
         local('git st')
         local('git pull origin master')
-        local('sudo supervisorctl restart washboard-staging')
+        local('sudo supervisorctl restart qdb-staging')
 
 def deploy_production():
     with lcd('../production/'):
         local('git pull origin master')
-        local('python manage.py migrate wb')
-        local('sudo supervisorctl restart washboard-production')
+        local('python manage.py migrate qdbapp')
+        local('sudo supervisorctl restart qdb-production')
