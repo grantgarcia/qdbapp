@@ -7,6 +7,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from qdbapp.models import Quote
 
+def default_context():
+    return settings.QDB_SETTINGS.copy()
+
 def do_or_404(action, catch=BaseException):
     try:
         return action()
@@ -24,10 +27,12 @@ def get_client_ip(request):
 
 def single_quote(request, quote_id):
     quote_id = do_or_404(lambda: int(quote_id))
-    data = {'pagename': '', 'title': 'Quote #%d' % quote_id}
-    data['quotes'] = [do_or_404(lambda: Quote.objects.get(id__exact=quote_id))]
+
+    context = default_context()
+    context['title'] = 'Quote #%d' % quote_id
+    context['quotes'] = [do_or_404(lambda: Quote.objects.get(id__exact=quote_id))]
     
-    return render(request, 'quotes.html', data)
+    return render(request, 'quotes.html', context)
 
 def quotes(request, **kwargs):    
     sort = request.GET.get('sort', 'newest')
@@ -37,8 +42,9 @@ def quotes(request, **kwargs):
     pagename = ''
     if not channel and not username:
         pagename = sort
-
-    data = {'pagename': pagename}
+    
+    context = default_context()
+    context['pagename'] = pagename
 
     # Filter by channel / username
     filter_query = {'%s__exact' % k: v for k, v in kwargs.iteritems()}
@@ -52,7 +58,7 @@ def quotes(request, **kwargs):
         must_not_contain = lambda quote: word[1:].lower() not in quote.body.lower()
         
         # Make the query available to the template
-        data['query'] = request.GET['q']
+        context['query'] = request.GET['q']
         
         # Iterate over search terms
         for word in request.GET['q'].split():
@@ -64,23 +70,23 @@ def quotes(request, **kwargs):
                 quotes = filter(must_contain, quotes)
     
     # Filter by page
-    quote_pages = Paginator(quotes, 20)
+    quote_pages = Paginator(quotes, context['quotes_per_page'])
     try:
-        data['quotes'] = quote_pages.page(request.GET.get('page'))
+        context['quotes'] = quote_pages.page(request.GET.get('page'))
     except PageNotAnInteger:
-        data['quotes'] = quote_pages.page(1)
+        context['quotes'] = quote_pages.page(1)
     except EmptyPage:
-        data['quotes'] = quote_pages.page(quote_pages.num_pages)
+        context['quotes'] = quote_pages.page(quote_pages.num_pages)
 
     # Build query string for pagination URLs
     paginate_query = request.GET.copy()
     if 'page' in paginate_query:
         del paginate_query['page']
-    data['paginate_query'] = paginate_query.urlencode()
-    if data['paginate_query']:
-        data['paginate_query'] += '&'
+    context['paginate_query'] = paginate_query.urlencode()
+    if context['paginate_query']:
+        context['paginate_query'] += '&'
 
-    return render(request, 'quotes.html', data)
+    return render(request, 'quotes.html', context)
 
 class QuoteForm(ModelForm):
     class Meta:
@@ -102,8 +108,11 @@ def add(request):
     else:
         quote_form = QuoteForm()
     
-    data = {'pagename': 'add', 'quote_form': quote_form}
-    return render(request, 'add.html', data)
+    context = default_context()
+    context['pagename'] = 'add'
+    context['quote_form'] = quote_form
+
+    return render(request, 'add.html', context)
 
 def vote(request, quote_id, direction):
     if request.method != 'POST':
@@ -118,4 +127,5 @@ def vote(request, quote_id, direction):
     
     # Reload the quote to get the new vote count
     quote = Quote.objects.get(id__exact=quote_id)
+
     return HttpResponse(str(quote.vote_total))
