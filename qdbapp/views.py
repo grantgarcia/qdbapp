@@ -35,9 +35,13 @@ def single_quote(request, quote_id):
     return render(request, 'quotes.html', context)
 
 def quotes(request, **kwargs):    
-    sort = request.GET.get('sort', 'newest')
+    sort = request.GET.get('sort')
     channel = kwargs.get('channel')
     username = kwargs.get('username')
+
+    if sort != 'top':
+        sort = 'newest'
+    ordering = {'top': 'votes', 'newest': '-timestamp'}[sort]
     
     pagename = ''
     if not channel and not username:
@@ -48,7 +52,7 @@ def quotes(request, **kwargs):
 
     # Filter by channel / username
     filter_query = {'%s__exact' % k: v for k, v in kwargs.iteritems()}
-    quotes = Quote.objects.filter(**filter_query).order_by('-timestamp')
+    quotes = Quote.objects.filter(**filter_query).order_by(ordering)
 
     # Filter by search query
     if 'q' in request.GET:
