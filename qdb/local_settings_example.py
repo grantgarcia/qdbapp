@@ -23,4 +23,7 @@ SECRET_KEY = ''
 
 BASE_URL = 'http://qdb.invalid/'
 
-QDB_NAME = 'My QDB'
+QDB_SETTINGS = {
+    'name': 'My QDB',
+    'quotes_per_page': 20,
+}

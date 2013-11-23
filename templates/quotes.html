@@ -2,6 +2,7 @@
 
 {% block body %}
 
+{% if quotes %}
 <ul class="list-unstyled">
     {% for quote in quotes %}
     <li id="quote-{{ quote.id }}" class="row">
@@ -21,8 +22,11 @@
     </article>
     {% endfor %}
 </ul>
+{% else %}
+<p class="text-info">There doesn't seem to be anything here.</p>
+{% endif %}
 
-{% if not hide_pagination %}
+{% if quotes.has_other_pages %}
 <ul class="pagination">
     {% if quotes.has_previous %}
     <li><a href="?{{ paginate_query }}page={{ quotes.previous_page_number }}">&laquo;</a></li>
@@ -71,6 +75,7 @@
     QDB.vote = function(quote, direction) {
         $.ajax({
             'url': '/vote/' + quote + '/' + direction,
+            'type': 'POST',
             'headers': {'X-CSRFToken': getCookie('csrftoken')},
         }).done(function(result) {
             $('#quote-' + quote + ' .vote_total').text(result);
