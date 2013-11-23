@@ -1,3 +1,4 @@
+from django.core.exceptions import SuspiciousOperation
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms import ModelForm
 from django.http import Http404, HttpResponse
@@ -104,6 +105,9 @@ def add(request):
     return render(request, 'add.html', data)
 
 def vote(request, quote_id, direction):
+    if request.method != 'POST':
+        raise SuspiciousOperation
+
     quote_id = do_or_404(lambda: int(quote_id))
     direction = do_or_404(lambda: {'up': 1, 'down': -1}[direction])
     quote = do_or_404(lambda: Quote.objects.get(id__exact=quote_id))

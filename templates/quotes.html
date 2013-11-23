@@ -71,6 +71,7 @@
     QDB.vote = function(quote, direction) {
         $.ajax({
             'url': '/vote/' + quote + '/' + direction,
+            'type': 'POST',
             'headers': {'X-CSRFToken': getCookie('csrftoken')},
         }).done(function(result) {
             $('#quote-' + quote + ' .vote_total').text(result);
