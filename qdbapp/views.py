@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms import ModelForm
@@ -23,7 +24,7 @@ def get_client_ip(request):
 
 def single_quote(request, quote_id):
     quote_id = do_or_404(lambda: int(quote_id))
-    data = {'pagename': '', 'title': 'Quote #%d' % quote_id, 'hide_pagination': True}
+    data = {'pagename': '', 'title': 'Quote #%d' % quote_id}
     data['quotes'] = [do_or_404(lambda: Quote.objects.get(id__exact=quote_id))]
     
     return render(request, 'quotes.html', data)
