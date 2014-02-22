@@ -5,6 +5,8 @@ from django.forms import ModelForm
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
+from captcha.fields import ReCaptchaField
+
 from qdbapp.models import Quote
 
 def default_context():
@@ -93,6 +95,8 @@ def quotes(request, **kwargs):
     return render(request, 'quotes.html', context)
 
 class QuoteForm(ModelForm):
+    captcha = ReCaptchaField()
+
     class Meta:
         model = Quote
         fields = ['body', 'channel', 'username']
