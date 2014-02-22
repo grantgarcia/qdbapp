@@ -27,3 +27,6 @@ QDB_SETTINGS = {
     'name': 'My QDB',
     'quotes_per_page': 20,
 }
+
+RECAPTCHA_PUBLIC_KEY = '########################################'
+RECAPTCHA_PRIVATE_KEY = '########################################'
